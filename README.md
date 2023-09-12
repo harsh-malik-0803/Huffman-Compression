@@ -1,8 +1,10 @@
 # Huffman Compression
 
 # Why Huffman Compression?
-Everybody loves compression. 
-Ques : The number of photos we can store on our smartphone? 
+Everybody loves compression.
+
+Ques : The number of photos we can store on our smartphone?
+
 Ans : It depends on how much we can compress the files with little or no loss. 
 
 The time required to download a file? The more we compress, the faster the download. 
