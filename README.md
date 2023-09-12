@@ -20,9 +20,9 @@ Encoding the data using this technique is very easy and efficient.
 However, decoding the bitstream generated using this technique is inefficient.Decoders(or Decompressors)require the knowledge of the encoding mechanism used in order to decode the encoded data back to the original characters. Hence information about the encoding process needs to be passed to the decoder along with the encoded data as a table of characters and their corresponding codes. In regular Huffman coding of a large data, this table takes up a lot of memory space and also if a large no. of unique characters are present in the data then the compressed(or encoded) data size increases because of the presence of the codebook.
 
 # Steps to build Huffman Tree
-1. Input is an array of unique characters along with their frequency of occurrences and output is Huffman Tree. 
+1. Input is an array of unique characters along with their frequency of occurrences and output is Huffman Tree.
 
-2.Create a leaf node for each unique character and build a min heap of all leaf nodes (Min Heap is used as a priority queue. The value of frequency field is used to compare two nodes in min heap. Initially, the least frequent character is at root)
+2. Create a leaf node for each unique character and build a min heap of all leaf nodes (Min Heap is used as a priority queue. The value of frequency field is used to compare two nodes in min heap. Initially, the least frequent character is at root)
 
 3. Extract two nodes with the minimum frequency from the min heap.
    
