@@ -218,8 +218,9 @@ int main(){
 
 	cout << "Enter your message : ";
 	string message;
-	cin >> message;
+	getline(cin, message);
 
+	cout << message << endl;
 	// Creating Huffman Tree
 	Huffman * huffman = new Huffman(message) ;
 
