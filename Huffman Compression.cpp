@@ -24,6 +24,21 @@ public:
 	}
 };
 
+// a messageNode : it gets transferred to the reveiver 
+class messageNode {
+public:
+	string message;
+	unordered_map<string, char> code;
+	messageNode() {
+		message = "";
+		code.clear();
+	}
+	messageNode(string message , unordered_map<string, char> code ) {
+		this->message = message;
+		this->code = code;
+	}
+};
+
 // frequency queue implementation for getting minimum frequency elements
 class PriorityQueue {
 
@@ -160,10 +175,10 @@ private:
 	}
 
 public:
-	string encode(){
+	messageNode encode(){
 		if (huffmanTreeRoot == NULL) {
 			cout << "Empty Message" << endl;
-			return "";
+			return messageNode();
 		}
 		// Till now we've code for every character in string, so we can convert the given string into their following Huffman Code
 		
@@ -172,25 +187,26 @@ public:
 			encoded_string += code[curr];
 		}
 
-		return this->encoded_string = encoded_string;
+		unordered_map<string, char> mp;
+		for (auto it : code) {
+			mp[it.second] = it.first;
+		}
+		return messageNode(encoded_string , mp );
 	}
 
-	string decode(){
+	string decode(messageNode encodedMessage){
 
 		// Now that we've encoded string and now we got to take our string back, so we've their back code as well.
 		string decoded_string = "";
-		Node* root = huffmanTreeRoot;
+		auto& code = encodedMessage.code;
+		auto& encoded_string = encodedMessage.message;
 
+		string temp = "";
 		for (char curr : encoded_string){
-			if ( curr == '0' ) {
-				root = root->left ;
-			}
-			else if (curr == '1') {
-				root = root->right ;
-			}
-			if (root->data != '$') {
-				decoded_string += root->data;
-				root = huffmanTreeRoot;
+			temp += curr ;
+			if ( code.find(temp) != code.end()) {
+				decoded_string += code[temp];
+				temp = "";
 			}
 		}
 		return decoded_string;
@@ -208,14 +224,16 @@ int main(){
 	Huffman * huffman = new Huffman(message) ;
 
 	// getting our encoded message
-	string encoded_string = huffman->encode();
-	if (encoded_string != "") {
-		cout << encoded_string << endl;
+	messageNode encodedMessage = huffman->encode();
+	if (encodedMessage.message != "") {
+		cout << encodedMessage.message<< endl;
 	}
-
+	for (auto it : encodedMessage.code) {
+		cout << it.first << " " << it.second << endl;
+	}
 	// getting our decoded message
 	// we can decode message at other end by getting our keys 
-	string decoded_string = huffman->decode();
+	string decoded_string = huffman->decode(encodedMessage);
 	cout << decoded_string << endl;
 
 	return 0;
