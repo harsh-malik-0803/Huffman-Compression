@@ -10,17 +10,14 @@ class Node {
 public:
 	char data;
 	int frequency;   // here frequency = frequency 
-	Node* left;
-	Node* right;
+	Node* left , * right ;
 	Node() {
-		left = NULL;
-		right = NULL;
+		left = right = nullptr;
 	}
 	Node(char name, int freq) {
 		this->data = name;
 		this->frequency = freq;
-		left = NULL;
-		right = NULL;
+		Node();
 	}
 };
 
@@ -29,46 +26,57 @@ class messageNode {
 public:
 	string message;
 	unordered_map<string, char> code;
-	messageNode() {
-		message = "";
-		code.clear();
-	}
+	messageNode() {}
+
 	messageNode(string message , unordered_map<string, char> code ) {
 		this->message = message;
 		this->code = code;
 	}
 };
 
-// frequency queue implementation for getting minimum frequency elements
+template<typename T>
 class PriorityQueue {
+	
+	T* m_data[300];  // as we have only 256 characters in keyboard 
+	int m_size;
 
-	Node* pq[300];  // as we have only 256 characters in keyboard 
-	int size;
 public:
 	PriorityQueue () {
-		size = 0;
+		m_size = 0;
 	}
 	int getsize() {
-		return size;
+		return m_size;
 	}
 	bool isEmpty() {
-		return (size == 0);
+		return m_size == 0;
 	}
-	Node* getmin() {
-		return pq[0];
+	T* getmin() {
+		if (isEmpty()) {
+			cout << "Empty Queue" << endl;
+			return nullptr;
+		}
+		return m_data[0];
 	}
-	void insert(Node* element) {
 
-		pq[size] = element;
-		++size;
-		int childindex = size - 1;
+private:
+	void swap(T** data1, T** data2) {
+		T * temp = *data1;
+		*data1 = *data2;
+		*data2 = temp; 
+	}
+
+public:
+
+	void insert( T* element) {
+
+		m_data[m_size] = element;
+		++m_size;
+		int childindex = m_size - 1;
 
 		while (childindex > 0) {
 			int parentindex = (childindex - 1) / 2;
-			if (pq[childindex]->frequency < pq[parentindex]->frequency) {
-				Node* temp = pq[childindex];
-				pq[childindex] = pq[parentindex];
-				pq[parentindex] = temp;
+			if (m_data[childindex]->frequency < m_data[parentindex]->frequency) {
+				swap(&m_data[childindex], &m_data[parentindex]);
 			}
 			else {
 				break;
@@ -78,28 +86,28 @@ public:
 	}
 	void removeMin() {
 
-		Node* ans = pq[0];
-		pq[0] = pq[size - 1];
-		--size;
+		T* ans = m_data[0];
+		m_data[0] = m_data[m_size - 1];
+		--m_size;
+
 		// downfy heap;
 		int parentindex = 0;
 		int leftchildindex = 2 * parentindex + 1;
 		int rightchildindex = 2 * parentindex + 2;
 
-		while (leftchildindex < size) {  // if not left child then 100% No right child;
+		while (leftchildindex < m_size) {  // if not left child then 100% No right child;
 			int minindex = parentindex;
-			if (pq[minindex]->frequency > pq[leftchildindex]->frequency) {
+			if (m_data[minindex]->frequency > m_data[leftchildindex]->frequency) {
 				minindex = leftchildindex;
 			}
-			if (rightchildindex < size && pq[rightchildindex]->frequency < pq[minindex]->frequency) {
+			if (rightchildindex < m_size && m_data[rightchildindex]->frequency < m_data[minindex]->frequency) {
 				minindex = rightchildindex;
 			}
 			if (minindex == parentindex) {
 				break;
 			}
-			Node* temp = pq[minindex];
-			pq[minindex] = pq[parentindex];
-			pq[parentindex] = temp;
+			swap( &m_data[minindex] , &m_data[parentindex]);
+			
 			parentindex = minindex;
 			leftchildindex = 2 * parentindex + 1;
 			rightchildindex = 2 * parentindex + 2;
@@ -108,44 +116,24 @@ public:
 	}
 };
 
+
 class Huffman {
-	Node* huffmanTreeRoot;
-	unordered_map<char, string> code ; // code for ith character
-	string message;
-	string encoded_string;
-	string decoded_string;
+	
+	Node * createHuffmanTree(string &message ) {
 
-public:
-	Huffman(string message ) {
-		huffmanTreeRoot = NULL;
-		this->message = message;
-		encoded_string = "";
-		decoded_string = "";
-		code.clear();
-
-		// creating huffman tree of given messsage 
-		createHuffmanTree();
-	}
-
-private:
-	void createHuffmanTree() {
-
-		// storing frequency of every character
 		unordered_map<char, int> frequency;
-
 		for (char curr : message) {
 			++frequency[curr];
 		}
 
 		// creating minheap
-		PriorityQueue minheap;
+		PriorityQueue<Node> minheap;
 
 		for (auto node : frequency ) {
 			Node* currNode = new Node(node.first , node.second );
 			minheap.insert(currNode);
 		}
 
-		// while size != 1 take two minimum put smallest on left and greater on right 
 		while (minheap.getsize() != 1) {
 
 			Node* leftNode = minheap.getmin();
@@ -158,51 +146,54 @@ private:
 			topNode->right = rightNode;
 			minheap.insert(topNode);
 		}
-		huffmanTreeRoot = minheap.getmin();
-		extractCodes(huffmanTreeRoot); 
+		return minheap.getmin();
 	}
 
 
-	void extractCodes(Node* root, string s = "") {
-		if (root == NULL) return;
+	void extractCodes(Node* root, unordered_map<char , string>& code , string s = "") {
+		if (root == nullptr) return;
 
-		else if (root->data != '$') {  // it means we reach at leaf node .
+		else if (root->data != '$') {
 			code[root->data] = s ;
 			return;
 		}
-		extractCodes(root->left, s + "0");
-		extractCodes(root->right, s + "1");
+
+		extractCodes(root->left, code , s + "0");
+		extractCodes(root->right, code , s + "1");
 	}
 
 public:
-	messageNode encode(){
-		if (huffmanTreeRoot == NULL) {
+
+	Huffman() {}
+
+	messageNode encode(string message ){
+
+		Node * huffmanTreeRoot = createHuffmanTree(message);
+		unordered_map<char , string  > code;
+		extractCodes(huffmanTreeRoot , code );
+
+		if (code.size() == 0 ) {
 			cout << "Empty Message" << endl;
 			return messageNode();
 		}
-		// Till now we've code for every character in string, so we can convert the given string into their following Huffman Code
-		
-		string encoded_string = "";
+
+		string encoded_string ;
 		for (char curr : message) {
 			encoded_string += code[curr];
 		}
 
-		unordered_map<string, char> mp;
+		unordered_map<string, char> charTocode;
 		for (auto it : code) {
-			mp[it.second] = it.first;
+			charTocode[it.second] = it.first;
 		}
-		return messageNode(encoded_string , mp );
+		return messageNode(encoded_string , charTocode );
 	}
 
-	string decode(messageNode encodedMessage){
+	string decode(string message , unordered_map<string, char> code ){
 
-		// Now that we've encoded string and now we got to take our string back, so we've their back code as well.
-		string decoded_string = "";
-		auto& code = encodedMessage.code;
-		auto& encoded_string = encodedMessage.message;
-
+		string decoded_string;
 		string temp = "";
-		for (char curr : encoded_string){
+		for (char curr : message ){
 			temp += curr ;
 			if ( code.find(temp) != code.end()) {
 				decoded_string += code[temp];
@@ -216,26 +207,26 @@ public:
 
 int main(){
 
+	
+	// Creating Huffman Tree
+	Huffman * huffman = new Huffman() ;
+
 	cout << "Enter your message : ";
 	string message;
 	getline(cin, message);
+	cout << "Given message : " <<message << endl;
 
-	cout << message << endl;
-	// Creating Huffman Tree
-	Huffman * huffman = new Huffman(message) ;
 
-	// getting our encoded message
-	messageNode encodedMessage = huffman->encode();
+	// getting our encoded message with code 
+	messageNode encodedMessage = huffman->encode(message);
 	if (encodedMessage.message != "") {
-		cout << encodedMessage.message<< endl;
+		cout <<"Encoded Message : "<< encodedMessage.message << endl;
 	}
-	for (auto it : encodedMessage.code) {
-		cout << it.first << " " << it.second << endl;
-	}
+	
 	// getting our decoded message
-	// we can decode message at other end by getting our keys 
-	string decoded_string = huffman->decode(encodedMessage);
-	cout << decoded_string << endl;
+	// we can decode message at other end by using keys 
+	string decoded_string = huffman->decode(encodedMessage.message , encodedMessage.code );
+	cout << "Decoded Message : " << decoded_string << endl;
 
 	return 0;
 }
