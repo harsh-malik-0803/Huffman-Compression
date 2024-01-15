@@ -32,3 +32,6 @@ However, decoding the bitstream generated using this technique is inefficient.De
 
 # Time complexity: O(nlogn) 
 Here n is the number of unique characters. If there are n nodes, extractMin() is called 2*(n – 1) times. extractMin() takes O(logn) time as it calls minHeapify(). So, the overall complexity is O(nlogn).
+
+# Compression
+Do compression of 20%-90% depend on  the data. If frequency of all characters are nearly same than compression is less.   
